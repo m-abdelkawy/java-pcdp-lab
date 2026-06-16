@@ -1,3 +1,70 @@
-.idea/
+# =========================
+# Maven
+# =========================
 target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Maven Wrapper (KEEP the wrapper, ignore only jar if needed)
+!.mvn/wrapper/maven-wrapper.jar
+
+# =========================
+# Java / Compiled files
+# =========================
+*.class
+*.log
+*.ctxt
+
+# =========================
+# IntelliJ IDEA
+# =========================
+.idea/
 *.iml
+*.iws
+out/
+
+# =========================
+# Eclipse (just in case)
+# =========================
+.project
+.classpath
+.settings/
+
+# =========================
+# VS Code (optional)
+# =========================
+.vscode/
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Environment / Secrets
+# =========================
+.env
+.env.*
+application-local.yml
+application-local.properties
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+
+# =========================
+# Temporary files
+# =========================
+tmp/
+temp/
+*.swp
+*~

@@ -9,9 +9,18 @@
     <artifactId>java-pcdp-lab</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <packaging>pom</packaging>
+
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
     </properties>
+
+    <modules>
+        <module>course01-parallel-programming/module01_welcome/miniproject_0</module>
+
+        <module>course01-parallel-programming/module02_task_parallelism/playground</module>
+        <module>course01-parallel-programming/module02_task_parallelism/miniproject_1</module>
+    </modules>
 
 </project>
