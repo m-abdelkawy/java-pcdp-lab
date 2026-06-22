@@ -21,6 +21,8 @@
 
         <module>course01-parallel-programming/module02_task_parallelism/playground</module>
         <module>course01-parallel-programming/module02_task_parallelism/miniproject_1</module>
+
+        <module>course01-parallel-programming/module03_functional_parallelism/miniproject_2</module>
     </modules>
 
 </project>
