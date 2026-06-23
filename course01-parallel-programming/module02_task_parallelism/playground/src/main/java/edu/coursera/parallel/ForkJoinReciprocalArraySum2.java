@@ -28,13 +28,18 @@ public class ForkJoinReciprocalArraySum2 {
                     ans += 1.0 / arr[i];
                 }
             } else {
-                SumArray left = new SumArray(arr, start, (start + end) / 2);
-                SumArray right = new SumArray(arr, (start + end) / 2, end);
-                left.fork();
-                // right.fork();
-                right.compute();
-                left.join();
-                // right.join();
+                int mid = (start + end) / 2;
+                SumArray left = new SumArray(arr, start, mid);
+                SumArray right = new SumArray(arr, mid, end);
+
+                // option #1 - fork left, compute right, join left
+//                left.fork();
+//                right.compute();
+//                left.join();
+
+                // option #2 - fork both, join both using invokeAll
+                invokeAll(left, right);
+
                 ans = left.ans + right.ans;
             }
         }
@@ -79,6 +84,7 @@ public class ForkJoinReciprocalArraySum2 {
             arr[i] = i + 1;
         }
 
+        // set the parallelism level to 8, which is the number of threads/workers in the common pool
         System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "8");
 
 
@@ -86,8 +92,6 @@ public class ForkJoinReciprocalArraySum2 {
             System.out.println("Run #" + (i + 1) + ":");
             seqArraySum(arr);
             parArraySum(arr);
-//            parArraySumNoFinish(arr);
-//            parArraySumNoFinishIntermediateValues(arr);
             System.out.println("===========");
         }
     }
