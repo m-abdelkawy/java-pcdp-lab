@@ -21,7 +21,7 @@ public class FutureReciprocalArraySum {
             if (end - start <= THRESHOLD) {
                 double sum = 0;
 
-                for (int i = start; i <= end; i++) {
+                for (int i = start; i < end; i++) {
                     sum += 1.0 / arr[i];
                 }
 
@@ -29,7 +29,7 @@ public class FutureReciprocalArraySum {
             }
             int mid = (start + end) / 2;
             SumTask leftTask = new SumTask(arr, start, mid);
-            SumTask rightTask = new SumTask(arr, mid + 1, end);
+            SumTask rightTask = new SumTask(arr, mid, end);
             rightTask.fork(); //future
             double left = leftTask.compute();
             double right = rightTask.join(); //wait for the right task to finish
