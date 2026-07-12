@@ -17,6 +17,10 @@
     </properties>
 
     <modules>
+        <!--module 00 revision-->
+        <module>general_playground/playground00</module>
+
+
         <module>course01-parallel-programming/module01_welcome/miniproject_0</module>
 
         <module>course01-parallel-programming/module02_task_parallelism/playground</module>
@@ -24,6 +28,10 @@
 
         <module>course01-parallel-programming/module03_functional_parallelism/miniproject_2</module>
         <module>course01-parallel-programming/module03_functional_parallelism/playground03</module>
+
+        <!--module 05 loop parallelism-->
+        <module>course01-parallel-programming/module05_loop_parallelism/miniproject_3</module>
+        <module>course01-parallel-programming/module05_loop_parallelism/playground05</module>
     </modules>
 
 </project>
