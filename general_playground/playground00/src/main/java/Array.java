@@ -8,7 +8,7 @@ import java.util.function.UnaryOperator;
  */
 @SuppressWarnings({"unchecked", "JavadocBlankLines", "JavadocDeclaration"})
 public class Array<E>
-       implements Iterable<E> {
+        implements Iterable<E> {
     /**
      * Default initial capacity.
      */
@@ -74,24 +74,24 @@ public class Array<E>
      *                              Collection} is null
      */
     public Array(Collection<? extends E> c) {
-        c.len
+        Objects.requireNonNull(c, "Input collection cannot be null");
+
+        this.mElementData = c.toArray();
+        this.mSize = this.mElementData.length;
     }
 
     /**
      * @return <tt>true</tt> If this {@link Array} contains no elements
      */
     public boolean isEmpty() {
-        // TODO -- you fill in here (replace 'return false' with
-        // proper code).
-        return false;
+        return mSize == 0;
     }
 
     /**
      * @return The number of elements in this {@link Array}
      */
     public int size() {
-        // TODO -- you fill in here (replace 'return 0' with proper code).
-        return 0;
+        return mSize;
     }
 
     /**
@@ -101,12 +101,15 @@ public class Array<E>
      *
      * @param o Element to search for
      * @return The index of the first occurrence of the specified
-     *         element in this {@link Array}, or -1 if this {@link
-     *         Array} does not contain the element
+     * element in this {@link Array}, or -1 if this {@link
+     * Array} does not contain the element
      */
     public int indexOf(Object o) {
-        // TODO -- you fill in here (replace 'return -1' with proper
-        // code).
+        for (int i = 0; i < mSize; i++) {
+            if (Objects.equals(o, mElementData[i])) {
+                return i;
+            }
+        }
         return -1;
     }
 
@@ -123,16 +126,19 @@ public class Array<E>
      * @param c {@link Collection} containing elements to be added to
      *          this {@link Array}
      * @return <tt>true</tt> If this {@link Array} changed as a result
-     *                       of the call
+     * of the call
      * @throws {@link NullPointerException} If the specified {@link
-     *                                      Collection} is null
+     *                Collection} is null
      */
     public boolean addAll(Collection<? extends E> c) {
-        // TODO -- you fill in here (replace 'return false' with
-        // proper code).  Try to avoid using Java loops, but use
-        // System.arraycopy() instead and also call
-        // ensureCapacityInternal() to simplify this code.
-        return false;
+        Objects.requireNonNull(c, "Input collection cannot be null");
+        int count = c.size();
+        int minCapacity = this.mSize + count;
+        Object[] elements = c.toArray();
+        ensureCapacityInternal(minCapacity);
+        System.arraycopy(elements, 0, this.mElementData, this.mSize, count);
+        this.mSize = minCapacity;
+        return !c.isEmpty();
     }
 
     /**
@@ -148,16 +154,17 @@ public class Array<E>
      * @param array An {@link Array} containing elements to added to
      *              this {@link Array}
      * @return <tt>true</tt> if this {@link Array} changed as a result
-     *                       of the call
+     * of the call
      * @throws {@link NullPointerException} if the specified {@link
-     *                                      Array} is null
+     *                Array} is null
      */
     public boolean addAll(Array<E> array) {
-        // TODO -- you fill in here (replace 'return false' with
-        // proper code).  Try to avoid using Java loops, but use
-        // System.arraycopy() instead and also call
-        // ensureCapacityInternal() to simplify this code.
-        return false;
+        Objects.requireNonNull(array, "Input array cannot be null");
+        int minCapacity = this.mSize + array.mSize;
+        ensureCapacityInternal(minCapacity);
+        System.arraycopy(array.mElementData, 0, this.mElementData, this.mSize, array.mSize);
+        this.mSize = minCapacity;
+        return !array.isEmpty();
     }
 
     /**
@@ -169,11 +176,11 @@ public class Array<E>
      * @return The element that was removed from the {@link Array}
      */
     public E remove(int index) {
-        // TODO -- you fill in here (replace 'return null' with proper
-        // code).  Try to avoid using Java loops, but use
-        // System.arraycopy() instead and also call rangeCheck() to
-        // simplify this code.
-        return null;
+        rangeCheck(index);
+        E oldValue = (E) mElementData[index];
+        System.arraycopy(mElementData, index + 1, mElementData, index, mSize - index - 1);
+        mElementData[--mSize] = null; // clear to let GC do its
+        return oldValue;
     }
 
     /**
@@ -181,17 +188,18 @@ public class Array<E>
      * non-negative and is not equal to or larger than the size of the
      * {@link Array}) and throws the {@link IndexOutOfBoundsException}
      * if it's not.
-     *
+     * <p>
      * Normally should be declared as 'private', but for unit test
      * access, has been declared 'public'.
      *
      * @param index The index of the element to check
      * @throws {@link IndexOutOfBoundsException} If {@code index} is
-     *                                           out of bounds
+     *                out of bounds
      */
     public void rangeCheck(int index) throws IndexOutOfBoundsException {
-        // TODO -- you fill in here.
-        
+        if (index < 0 || index >= mSize) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + mSize);
+        }
     }
 
     /**
@@ -201,12 +209,11 @@ public class Array<E>
      *
      * @param index The index of the element to return
      * @return The element at the specified position in this {@link
-     *         Array}
+     * Array}
      */
     public E get(int index) {
-        // TODO -- you fill in here (replace 'return null' with proper
-        // code).  Make sure to use the rangeCheck() method here.
-        return null;
+        rangeCheck(index);
+        return (E) mElementData[index];
     }
 
     /**
@@ -214,15 +221,16 @@ public class Array<E>
      * with the specified element.  {@link IndexOutOfBoundsException}
      * is thrown if {@code index} is out of range.
      *
-     * @param index The index of the element to replace
+     * @param index   The index of the element to replace
      * @param element The element to be stored at the specified
      *                position
      * @return The element previously at the specified position
      */
     public E set(int index, E element) {
-        // TODO -- you fill in here (replace 'return null' with proper
-        // code).
-        return null;
+        rangeCheck(index);
+        E oldValue = (E) mElementData[index];
+        mElementData[index] = element;
+        return oldValue;
     }
 
     /**
@@ -232,17 +240,16 @@ public class Array<E>
      * @return {@code true}
      */
     public boolean add(E element) {
-        // TODO -- you fill in here (replace 'return false' with
-        // proper code).  Call ensureCapacityInternal() to simplify
-        // this code.
-        return false;
+        ensureCapacityInternal(mSize + 1);
+        mElementData[mSize++] = element;
+        return true;
     }
 
     /**
      * Ensure this {@link Array} is large enough to hold {@code
      * minCapacity} elements.  The {@link Array} will be expanded if
      * necessary.
-     *
+     * <p>
      * Normally should be declared as 'private', but for unit test
      * access, it has been declared 'protected'.
      *
@@ -250,19 +257,21 @@ public class Array<E>
      *                    Array}
      */
     protected void ensureCapacityInternal(int minCapacity) {
-        // TODO -- you fill in here.  Try to avoid using Java loops,
-        // but use System.arraycopy() or Arrays.copyOf() instead.
-        
+        int currentCapacity = mElementData.length;
+        if (currentCapacity < minCapacity) {
+            this.mElementData = Arrays
+                    .copyOf(mElementData, Math.max(
+                            Math.max(currentCapacity * 2, minCapacity),
+                            DEFAULT_CAPACITY));
+        }
     }
 
     /**
      * @return An {@link Iterator} over the elements in this {@link
-     *         Array} in proper sequence
+     * Array} in proper sequence
      */
     public Iterator<E> iterator() {
-        // TODO -- you fill in here replacing this statement with your
-        // solution.
-        return null;
+        return new ArrayIterator();
     }
 
     /**
@@ -274,36 +283,33 @@ public class Array<E>
         /**
          * Current position in the {@link Array} (defaults to 0).
          */
-        // TODO - you fill in here.
-        
+        private int cursor = 0;
 
         /**
          * Index of last element returned; -1 if no such element.
          */
-        // TODO - you fill in here.
-        
+        private int lastReturned = -1;
+
 
         /**
          * @return True if the iteration has more elements that
-         *         haven't been iterated through yet, else false
+         * haven't been iterated through yet, else false
          */
         @Override
         public boolean hasNext() {
-            // TODO - you fill in here (replace 'return false' with
-            // proper code).
-            return false;
+            return cursor < mSize;
         }
 
         /**
          * @return The next element in the iteration
          * @throws {@link NoSuchElementException} if there's no next
-         *         element
+         *                element
          */
         @Override
         public E next() {
-            // TODO - you fill in here (replace 'return null' with
-            // proper code).
-            return null;
+            if(cursor >= mSize) throw new NoSuchElementException("No more elements in the iterator");
+            lastReturned = cursor;
+            return (E) mElementData[cursor++];
         }
 
         /**
@@ -316,8 +322,11 @@ public class Array<E>
          */
         @Override
         public void remove() {
-            // TODO - you fill in here
-            
+            if(lastReturned < 0)
+                throw new IllegalStateException("No last element to remove");
+            Array.this.remove(lastReturned);
+            cursor = lastReturned;
+            lastReturned = -1; // called only once per call to {@code next()}, so we do not allow another remove() call until next() is called again.
         }
     }
 
@@ -337,9 +346,9 @@ public class Array<E>
      *                 each element
      */
     public void replaceAll(UnaryOperator<E> operator) {
-        // TODO - you fill in here (this implementation can use a Java
-        //  index-based for loop).
-        
+        for (int i = 0; i < mSize; i++) {
+            mElementData[i] = operator.apply((E) mElementData[i]);
+        }
     }
 
     /**
@@ -357,7 +366,7 @@ public class Array<E>
     public void forEach(Consumer<? super E> action) {
         // TODO - You fill in here using a for-each loop or
         // the Iterator.forEachRemaining() method.
-        
+
     }
 
     /**
@@ -377,8 +386,8 @@ public class Array<E>
 
     /**
      * @return A reference to the underlying buffer containing all
-     *         the elements in this {@link Array} object in proper
-     *         sequence
+     * the elements in this {@link Array} object in proper
+     * sequence
      */
     public Object[] uncheckedToArray() {
         return mElementData;
@@ -388,17 +397,17 @@ public class Array<E>
      * Returns an {@link Object} array containing all the elements in
      * this {@link Array} in proper sequence (from first to last
      * element).
-     *
+     * <p>
      * The returned {@link Array} will be "safe" in that no references
      * to it are maintained by this {@link Array} (in other words,
      * this method must allocate a new {@link Array}).  The caller is
      * thus free to modify the returned {@link Array}.
-     *
+     * <p>
      * This method acts as a bridge between array-based and
      * collection-based APIs.
      *
      * @return An {@link Object} array containing all the elements in
-     *         this {@link Array} object in proper sequence
+     * this {@link Array} object in proper sequence
      */
     public Object[] toArray() {
         return Arrays.copyOf(mElementData, mSize);
@@ -419,10 +428,10 @@ public class Array<E>
      *              of the same runtime type is created for this purpose
      * @return An array containing the elements of this {@link Array}
      * @throws {@link ArrayStoreException} If the runtime type of the
-     *         specified {@code array} is not a supertype of the
-     *         runtime type of every element in this {@link Array}
+     *                specified {@code array} is not a supertype of the
+     *                runtime type of every element in this {@link Array}
      * @throws {@link NullPointerException} If the specified {@code
-     *                                      array} is null
+     *                array} is null
      */
     @SuppressWarnings("unchecked")
     public <T> T[] toArray(T[] array) {
@@ -433,14 +442,14 @@ public class Array<E>
             // Make a new array of array's runtime type, but with this
             // Array's contents.
             return (T[]) Arrays.copyOf(mElementData,
-                mSize,
-                array.getClass());
+                    mSize,
+                    array.getClass());
         } else {
             // Copy the elements from this Array into the given array
             // starting from the beginning of both sources.
             System.arraycopy(mElementData, 0,
-                array, 0,
-                mSize);
+                    array, 0,
+                    mSize);
 
             // If the given array's length is larger than this Array's
             // size, set the element at the position of the array's
