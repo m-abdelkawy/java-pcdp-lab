@@ -32,6 +32,10 @@
         <!--module 05 loop parallelism-->
         <module>course01-parallel-programming/module05_loop_parallelism/miniproject_3</module>
         <module>course01-parallel-programming/module05_loop_parallelism/playground05</module>
+
+        <!--module 06 data flow synchronization and pipelining-->
+        <module>course01-parallel-programming/module06_data_flow/miniproject_4</module>
+        <module>course01-parallel-programming/module06_data_flow/playground06</module>
     </modules>
 
 </project>
