@@ -113,7 +113,7 @@ public final class OneDimAveragingPhaser {
 
         Phaser[] phs = new Phaser[tasks];
 
-        for (int i = 0; i < phs.length; i++) {
+        for (int i = 0; i < tasks; i++) {
             phs[i] = new Phaser(1);
         }
 
@@ -173,13 +173,14 @@ public final class OneDimAveragingPhaser {
 
     }
 
+    // phaser array
     public static void runParallelFuzzyBarrier(final int iterations,
                                                final double[] myNew, final double[] myVal, final int n,
                                                final int tasks) {
 
         Phaser[] phs = new Phaser[tasks];
 
-        for (int i = 0; i < phs.length; i++) {
+        for (int i = 0; i < tasks; i++) {
             phs[i] = new Phaser(1);
         }
 
@@ -190,7 +191,7 @@ public final class OneDimAveragingPhaser {
 
             //small improvements
             final Phaser currentPhaser = phs[i];
-            final Phaser leftNeighbor = (i - 1 >= 0) ? phs[i - 1] : null;
+            final Phaser leftNeighbor = (i > 0) ? phs[i - 1] : null;
             final Phaser rightNeighbor = (i + 1 < tasks) ? phs[i + 1] : null;
 
             threads[ii] = new Thread(() -> {
@@ -202,14 +203,12 @@ public final class OneDimAveragingPhaser {
                 int right = left + chunkSize - 1;
                 if (right > n) right = n;
 
-                final boolean hasDistinctRight = right > left;
-
                 for (int itr = 0; itr < iterations; itr++) {
 
                     threadNewVal[left] =
                             (threadMyVal[left - 1] + threadMyVal[left + 1]) / 2.0;
 
-                    if (hasDistinctRight) {
+                    if (right > left) {
                         threadNewVal[right] =
                                 (threadMyVal[right - 1] + threadMyVal[right + 1]) / 2.0;
                     }
@@ -237,11 +236,73 @@ public final class OneDimAveragingPhaser {
             threads[ii].start();
         }
 
-        for (int ii = 0; ii < tasks; ii++) {
+        for (Thread thread: threads) {
             try {
-                threads[ii].join();
+                thread.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            }
+        }
+
+    }
+
+
+    public static void runParallelFuzzyBarrier_onePhaser(final int iterations,
+                                               final double[] myNew, final double[] myVal, final int n,
+                                               final int tasks) {
+
+        Phaser ph = new Phaser(tasks);
+
+        Thread[] threads = new Thread[tasks];
+
+        for (int ii = 0; ii < tasks; ii++) {
+            final int i = ii;
+
+            final int chunkSize = (n + tasks - 1) / tasks;
+            threads[ii] = new Thread(() -> {
+                double[] threadMyVal = myVal;
+                double[] threadNewVal = myNew;
+
+                final int left = i * chunkSize + 1;
+                final int right = Math.min(left + chunkSize - 1, n);
+                final int interiorStart = left + 1;
+                final int interiorEnd = right - 1;
+
+                for (int itr = 0; itr < iterations; itr++) {
+
+                    threadNewVal[left] =
+                            (threadMyVal[left - 1] + threadMyVal[left + 1]) / 2.0;
+
+                    if (right > left) {
+                        threadNewVal[right] =
+                                (threadMyVal[right - 1] + threadMyVal[right + 1]) / 2.0;
+                    }
+
+                    //before swapping, we need the phaser
+                    int currentPhase = ph.arrive();
+
+                    // calculation of average
+                    for (int j = interiorStart; j <= interiorEnd; j++) {
+                        threadNewVal[j] = (threadMyVal[j - 1] + threadMyVal[j + 1]) / 2.0;
+                    }
+
+                    ph.awaitAdvance(currentPhase);
+
+                    //swap
+                    double[] temp = threadMyVal;
+                    threadMyVal = threadNewVal;
+                    threadNewVal = temp;
+                }
+            });
+            threads[ii].start();
+        }
+
+        for (Thread thread: threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
             }
         }
 
