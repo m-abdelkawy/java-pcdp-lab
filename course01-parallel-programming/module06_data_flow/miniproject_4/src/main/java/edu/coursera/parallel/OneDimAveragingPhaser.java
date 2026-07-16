@@ -194,31 +194,34 @@ public final class OneDimAveragingPhaser {
             final Phaser leftNeighbor = (i > 0) ? phs[i - 1] : null;
             final Phaser rightNeighbor = (i + 1 < tasks) ? phs[i + 1] : null;
 
+            final int chunkSize = (n + tasks - 1) / tasks;
             threads[ii] = new Thread(() -> {
                 double[] threadMyVal = myVal;
                 double[] threadNewVal = myNew;
 
-                final int chunkSize = (n + tasks - 1) / tasks;
                 final int left = i * chunkSize + 1;
                 int right = left + chunkSize - 1;
                 if (right > n) right = n;
+                final boolean hasDistinctRight = right > left;
+
+                final int lastInterior = right - 1;
 
                 for (int itr = 0; itr < iterations; itr++) {
 
                     threadNewVal[left] =
-                            (threadMyVal[left - 1] + threadMyVal[left + 1]) / 2.0;
+                            (threadMyVal[left - 1] + threadMyVal[left + 1]) * 0.50;
 
-                    if (right > left) {
+                    if (hasDistinctRight) {
                         threadNewVal[right] =
-                                (threadMyVal[right - 1] + threadMyVal[right + 1]) / 2.0;
+                                (threadMyVal[right - 1] + threadMyVal[right + 1]) * 0.50;
                     }
 
                     //before swapping, we need the phaser
                     int currentPhase = currentPhaser.arrive();
 
                     // calculation of average
-                    for (int j = left + 1; j <= right - 1; j++) {
-                        threadNewVal[j] = (threadMyVal[j - 1] + threadMyVal[j + 1]) / 2.0;
+                    for (int j = left + 1; j <= lastInterior; j++) {
+                        threadNewVal[j] = (threadMyVal[j - 1] + threadMyVal[j + 1]) * 0.50;
                     }
 
                     if (leftNeighbor != null)
